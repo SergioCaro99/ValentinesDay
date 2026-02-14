@@ -73,6 +73,8 @@
                 
                 if (window.lucide && window.lucide.icons && window.lucide.icons[pascalName]) {
                     const iconDef = window.lucide.icons[pascalName];
+                    
+                    // Crear elemento SVG usando el helper de Lucide
                     const svgElement = window.lucide.createElement(iconDef);
                     
                     svgElement.setAttribute('width', size);
@@ -143,7 +145,7 @@
                 return () => clearInterval(timer);
             }, []);
 
-            // FUNCIÓN DE AUDIO CORREGIDA (Control directo)
+            // FUNCIÓN DE AUDIO CORREGIDA (Control directo sin useEffect)
             const toggleAudio = () => {
                 if (!audioRef.current) return;
 
@@ -151,17 +153,15 @@
                     audioRef.current.pause();
                     setIsPlaying(false);
                 } else {
-                    // Intentar reproducir y manejar errores (ej. si el archivo no carga)
                     const playPromise = audioRef.current.play();
-                    
                     if (playPromise !== undefined) {
                         playPromise
                             .then(() => {
                                 setIsPlaying(true);
                             })
                             .catch(error => {
-                                console.error("Error al reproducir el audio:", error);
-                                alert("No se pudo reproducir el audio. Verifica que el archivo 'perfect.mp3' esté en la carpeta correcta.");
+                                console.error("Error al reproducir audio:", error);
+                                // Intento de fallback si falla la primera vez
                                 setIsPlaying(false);
                             });
                     }
@@ -660,7 +660,7 @@
                 <div className="min-h-screen bg-rose-50 text-slate-800 font-sans relative selection:bg-rose-300/50 overflow-x-hidden">
                 
                 {/* Audio oculto */}
-                <audio ref={audioRef} src="perfect.mp3" loop />
+                <audio ref={audioRef} src="perfect.mp3" loop preload="auto" />
 
                 {/* Fondos Animados */}
                 <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
@@ -676,7 +676,7 @@
                         Reproduce
                     </span>
                     <button 
-                        onClick={() => setIsPlaying(!isPlaying)}
+                        onClick={toggleAudio}
                         className="w-10 h-10 rounded-full bg-rose-500 flex items-center justify-center hover:bg-rose-600 transition-all shadow-md text-white active:scale-95"
                     >
                         {isPlaying ? <Pause size={16} /> : <Play size={16} className="ml-1" />}
